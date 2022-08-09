@@ -16,6 +16,7 @@ import net.jitse.npclib.internal.NPCBase;
 import net.jitse.npclib.nms.v1_8_R3.packets.*;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
@@ -23,6 +24,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,17 +40,21 @@ public class NPC_v1_8_R3 extends NPCBase {
 
     public NPC_v1_8_R3(NPCLib instance, List<String> lines) {
         super(instance, lines);
+        this.text = text != null ? text : Collections.emptyList();
     }
 
+
+
     @Override
-    public Hologram getPlayerHologram(Player player) {
-        Hologram holo = super.getPlayerHologram(player);
+    public Hologram getHologram(Player player) {
+        Hologram holo = super.getHologram(player);
         if (holo == null) {
-            holo = new Hologram(MinecraftVersion.V1_8_R3, location.clone().add(0, 0.5, 0), getPlayerLines(player));
+            holo = new Hologram(MinecraftVersion.V1_8_R3, location.clone().add(0, 0.5, 0), text);
         }
         super.playerHologram.put(player.getUniqueId(), holo);
         return holo;
     }
+
 
     @Override
     public void createPackets() {
@@ -90,11 +96,11 @@ public class NPC_v1_8_R3 extends NPCBase {
         playerConnection.sendPacket(packetPlayOutNamedEntitySpawn);
         playerConnection.sendPacket(packetPlayOutEntityHeadRotation);
 
-        getPlayerHologram(player).show(player);
+        getHologram(player).show(player);
 
         // Removing the player info after 10 seconds.
         Bukkit.getScheduler().runTaskLater(instance.getPlugin(), () ->
-                playerConnection.sendPacket(packetPlayOutPlayerInfoRemove), 200);
+                playerConnection.sendPacket(packetPlayOutPlayerInfoRemove), 20);
     }
 
     @Override
@@ -104,7 +110,7 @@ public class NPC_v1_8_R3 extends NPCBase {
         playerConnection.sendPacket(packetPlayOutEntityDestroy);
         playerConnection.sendPacket(packetPlayOutPlayerInfoRemove);
 
-        getPlayerHologram(player).hide(player);
+        getHologram(player).hide(player);
     }
 
     @Override
